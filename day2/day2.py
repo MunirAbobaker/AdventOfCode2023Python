@@ -54,9 +54,61 @@ class Day2Part1:
     
     def get_solution(self) -> int:
         return self.sum_valid_games()
+    
+
+class Day2Part2:
+    class Color(enum.Enum):
+        BLUE = "blue"
+        GREEN = "green"
+        RED = "red"
+
+    def __init__(self, config: List[int], file_path: str):
+        self.config = config
+        self.games = self.load_games(file_path)
+
+    def parse_color_value(self, value: str) -> Tuple[int, str]:
+        amount, color = value.strip().split(' ')
+        return int(amount), color
+
+    def parse_game_values(self, values: str) -> List[List[int]]:
+        game_sub_values = []
+        blue, green, red = 0, 0, 0
+        for v in values.split(';'): # runs
+            for amount, color in map(self.parse_color_value, v.split(',')):
+                if color == Day2Part2.Color.BLUE.value:
+                    if amount > blue:
+                        blue = amount
+                elif color == Day2Part2.Color.GREEN.value:
+                    if amount > green:
+                        green = amount
+                elif color == Day2Part2.Color.RED.value:
+                    if amount > red:
+                        red = amount
+        game_sub_values.append([blue, green, red])
+        return game_sub_values
+
+    def load_games(self, file_path: str) -> Dict[str, List[List[int]]]:
+        with open(file_path) as f:
+            lines = f.readlines()
+        
+        return {
+            key: self.parse_game_values(values)
+            for line in lines
+            for key, values in [line.split(':')]
+        }
+
+    def get_solution(self) -> int:
+        multiply_game = lambda game : game[0][0] * game[0][1] * game[0][2]
+        return sum(map(lambda game: multiply_game(game), self.games.values()))
+    
+    
 
 if __name__ == "__main__":
     config = [14, 13, 12]
     day2part1 = Day2Part1(config, "../data/day2.txt")
     total_sum = day2part1.get_solution()
+    print(f"Number of valid games: {total_sum}")
+
+    day2part2 = Day2Part2(config, "../data/day2.txt")
+    total_sum = day2part2.get_solution()
     print(f"Number of valid games: {total_sum}")
